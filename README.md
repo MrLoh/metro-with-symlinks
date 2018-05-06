@@ -15,7 +15,6 @@ For example you can replace the start script in your `package.json` with this:
 ```json
 "scripts": {
     "start": "node ./node_modules/metro-with-symlinks start",
-    ...
 }
 ```
 
