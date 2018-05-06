@@ -1,0 +1,9 @@
+{
+  "name": "metro-with-symlinks",
+  "version": "1.0.0",
+  "description": "Extension to metro packager enabling the use of symlinks",
+  "main": "index.js",
+  "author": "@MrLoh",
+  "license": "MIT",
+  "private": false
+}
