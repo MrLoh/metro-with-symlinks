@@ -1,12 +1,15 @@
 {
   "name": "metro-with-symlinks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extension to metro packager enabling the use of symlinks",
   "repository": "https://github.com/MrLoh/metro-with-symlinks",
   "main": "index.js",
   "author": "@MrLoh",
   "license": "MIT",
   "private": false,
+  "sripts": {
+    "publish": "npm version patch && npm publish"
+  },
   "peerDependencies": {
     "react-native": "^0.55.3"
   }
