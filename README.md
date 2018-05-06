@@ -6,6 +6,8 @@ All this does is generate a custom `metro.config.js` file based on checking for 
 
 ## Usage
 
+You can install this via `yarn add metro-with-symlinks` (or `npm i -S`).
+
 You use this by simply running this script from your node modules `node ./node_modules/metro-with-symlinks` instead of the standard metro bundler. It takes the same arguments as the Metro bundler. 
 
 For example you can replace the start script in your `package.json` with this: 
