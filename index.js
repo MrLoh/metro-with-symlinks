@@ -16,11 +16,11 @@ const getDependencyPath = (dependency) => fs.realpathSync(`node_modules/${depend
 const getSymlinkedDependencies = () => {
   const packageJson = require(`${process.cwd()}/package.json`);
   const dependencies = [
-  ...Object.keys(packageJson.dependencies),
-  ...Object.keys(packageJson.devDependencies),
+    ...Object.keys(packageJson.dependencies),
+    ...Object.keys(packageJson.devDependencies),
   ];
   return dependencies.filter((dependency) =>
-  fs.lstatSync(`node_modules/${dependency}`).isSymbolicLink()
+    fs.lstatSync(`node_modules/${dependency}`).isSymbolicLink()
   );
 };
 
@@ -28,48 +28,39 @@ const generateMetroConfig = (symlinkedDependencies) => {
   const symlinkedDependenciesPaths = symlinkedDependencies.map(getDependencyPath);
 
   const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
-  .map((path) => require(`${path}/package.json`).peerDependencies)
-  .map((peerDependencies) => (peerDependencies ? Object.keys(peerDependencies) : []))
-  // flatten the array of arrays
-  .reduce((flatDependencies, dependencies) => [...flatDependencies, ...dependencies], [])
-  // filter to make array elements unique
-  .filter((dependency, i, dependencies) => dependencies.indexOf(dependency) === i);
+    .map((path) => require(`${path}/package.json`).peerDependencies)
+    .map((peerDependencies) => (peerDependencies ? Object.keys(peerDependencies) : []))
+    // flatten the array of arrays
+    .reduce((flatDependencies, dependencies) => [...flatDependencies, ...dependencies], [])
+    // filter to make array elements unique
+    .filter((dependency, i, dependencies) => dependencies.indexOf(dependency) === i);
 
   fs.writeFileSync(
-  'metro.config.js',
-  `/* eslint-disable */
+    'metro.config.js',
+    `/* eslint-disable */
 const path = require('path');
-let blacklist
-try {
-  blacklist = require('metro-bundler/src/blacklist');
-} catch(e) {
-  blacklist = require('metro/src/blacklist');
-}
+const blacklist = require('metro/src/blacklist');
 
 module.exports = {
   extraNodeModules: {
-  ${peerDependenciesOfSymlinkedDependencies
-  .map((name) => `'${name}': path.resolve(__dirname, 'node_modules/${name}')`)
-  .join(',\n\t\t')}
+    ${peerDependenciesOfSymlinkedDependencies
+      .map((name) => `'${name}': path.resolve(__dirname, 'node_modules/${name}')`)
+      .join(',\n    ')}
   },
-  getBlacklistRE() {
-  return blacklist([
-  ${symlinkedDependenciesPaths
-  .map(
-  (path) =>
-  `/${path.replace(/\//g, '[/\\\\]')}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
-  )
-  .join(',\n\t\t\t')}
-  ]);
-  },
-  getProjectRoots() {
-  return [
-  // Include current package as project root
-  path.resolve(__dirname),
-  // Include symlinked packages as project roots
-  ${symlinkedDependenciesPaths.map((path) => `path.resolve('${path}')`).join(',\n\t\t\t')}
-  ];
-  }
+  getBlacklistRE: () => blacklist([
+    ${symlinkedDependenciesPaths
+      .map(
+        (path) =>
+          `/${path.replace(/\//g, '[/\\\\]')}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
+      )
+      .join(',\n    ')}
+  ]),
+  getProjectRoots: () => [
+    // Include current package as project root
+    path.resolve(__dirname),
+    // Include symlinked packages as project roots
+    ${symlinkedDependenciesPaths.map((path) => `path.resolve('${path}')`).join(',\n    ')}
+  ],
 };`
   );
 };
