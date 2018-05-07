@@ -1,4 +1,4 @@
-# Run Metro with Symlinks
+# metro-with-symlinks
 
 There is a longstanding [issue](https://github.com/facebook/metro/issues/1#issuecomment-386852670) with [Metro](https://github.com/facebook/metro) not accepting symlinks and thus making it hard to use in monorepo setups or example projects. This script provides a solution. 
 
@@ -6,14 +6,19 @@ All this does is generate a custom `metro.config.js` file based on checking for 
 
 ## Usage
 
-You can install this via `yarn add -D metro-with-symlinks` (or `npm i -D`).
-
-You use this by simply running this script from your node modules `node ./node_modules/metro-with-symlinks` instead of the standard metro bundler. It takes the same arguments as the Metro bundler. 
-
-For example you can replace the start script in your `package.json` with this: 
-
+```bash
+# Install
+yarn add -D metro-with-symlinks
+# or
+npm install -D metro-with-symlinks
 ```
-"start": "node ./node_modules/metro-with-symlinks start"
+
+Replace the start script in your `package.json` with this: 
+
+```json
+"scripts": {
+    "start": "metro-with-symlinks start",
+}
 ```
 
 You can also configure the generated condig to be picked up by Xcode and Android Studio, you will need to ensure it was created by using the start script at least once, which will create a `metro.config.js` file in your root directory. 
