@@ -20,11 +20,11 @@ You can also configure the generated condig to be picked up by Xcode and Android
 
 In Xcode you can assign an environment variable in the build phase `Bundle React Native code and images` by adding the line `export BUNDLE_CONFIG=./metro.config.js` to the script: 
 
-![./assets/xcode_screenshot.png](Xcode bundle config)
+!(https://raw.githubusercontent.com/MrLoh/metro-with-symlinks/master/assets/xcode_screenshot.png)[Xcode bundle config]
 
 In Android you just have to include `bundleConfig: "./metro.config.js"` in the `project.ext.react` field of your `android/app/build.gradle`:
 
-![./assets/ancroidstudio_screenshot.png](Android Studio bundle config)
+!(https://github.com/MrLoh/metro-with-symlinks/raw/master/assets/androidstudio_screenshot.png)[Android Studio bundle config]
 
 ## Contributing
 
