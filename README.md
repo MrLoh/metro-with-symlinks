@@ -12,11 +12,19 @@ You use this by simply running this script from your node modules `node ./node_m
 
 For example you can replace the start script in your `package.json` with this: 
 
-```json
-"scripts": {
-    "start": "node ./node_modules/metro-with-symlinks start",
-}
 ```
+"start": "node ./node_modules/metro-with-symlinks start"
+```
+
+You can also configure the generated condig to be picked up by Xcode and Android Studio, you will need to ensure it was created by using the start script at least once, which will create a `metro.config.js` file in your root directory. 
+
+In Xcode you can assign an environment variable in the build phase `Bundle React Native code and images` by adding the line `export BUNDLE_CONFIG=./metro.config.js` to the script: 
+
+![./assets/xcode_screenshot.png](Xcode bundle config)
+
+In Android you just have to include `bundleConfig: "./metro.config.js"` in the `project.ext.react` field of your `android/app/build.gradle`:
+
+![./assets/ancroidstudio_screenshot.png](Android Studio bundle config)
 
 ## Contributing
 
