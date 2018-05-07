@@ -8,9 +8,7 @@
 const fs = require('fs')
 const exec = require('child_process').execSync
 const dedent = require('dedent-js')
-
-const getDependencyPath = dependency =>
-    fs.realpathSync(`node_modules/${dependency}`)
+const getDependencyPath = require('./getDependencyPath')
 
 const mapModule = name =>
     `    '${name}': path.resolve(__dirname, 'node_modules/${name}')`

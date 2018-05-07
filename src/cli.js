@@ -10,6 +10,7 @@ const exec = require('child_process').execSync
 const dedent = require('dedent-js')
 const getSymlinkedDependencies = require('./getSymlinkedDependencies')
 const getMetroConfig = require('./getMetroConfig')
+const getDependencyPath = require('./getDependencyPath')
 
 const mapDep = dep => `    - ${dep} -> ${getDependencyPath(dep)}`
 
