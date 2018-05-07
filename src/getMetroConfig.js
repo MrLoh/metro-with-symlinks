@@ -12,20 +12,16 @@ const dedent = require('dedent-js')
 const getDependencyPath = dependency =>
     fs.realpathSync(`node_modules/${dependency}`)
 
-const isSymlink = dependency =>
-    fs.lstatSync(`node_modules/${dependency}`).isSymbolicLink()
-const getSymlinkedDependencies = () =>
-    fs.readdirSync(`${process.cwd()}/node_modules`).filter(isSymlink)
-
 const mapModule = name =>
     `    '${name}': path.resolve(__dirname, 'node_modules/${name}')`
+
 const mapPath = path =>
     `    /${path.replace(
         /\//g,
         '[/\\\\]',
     )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
 
-const generateMetroConfig = symlinkedDependencies => {
+module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
         getDependencyPath,
     )
@@ -80,27 +76,3 @@ const generateMetroConfig = symlinkedDependencies => {
        };
    `
 }
-
-const symlinkedDependencies = getSymlinkedDependencies()
-const packagesString = symlinkedDependencies
-    .map(
-        dependency => `    - ${dependency} -> ${getDependencyPath(dependency)}`,
-    )
-    .join('\n')
-
-const config = generateMetroConfig(symlinkedDependencies)
-fs.writeFileSync('metro.config.js', config)
-
-console.log(dedent`
-    using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks
-
-    Detected symlinked packages:
-    ${packagesString}
-`)
-
-const command = process.argv[2]
-const flags = process.argv.slice(3).join(' ')
-exec(
-    `node node_modules/react-native/local-cli/cli.js ${command} --config ../../../../metro.config.js ${flags}`,
-    { stdio: [0, 1, 2] },
-)
