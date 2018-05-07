@@ -4,6 +4,10 @@
   "description": "Extension to metro packager enabling the use of symlinks.",
   "license": "MIT",
   "author": "@MrLoh",
+  "files": [
+    "src",
+    "bin"
+  ],
   "main": "./src/index.js",
   "bin": {
     "metro-with-symlinks": "./bin/index.js"
@@ -14,10 +18,10 @@
     "publish": "npm version patch && npm publish",
     "test": "format"
   },
-  "devDependencies": {
-    "prettier": "^1.12.1"
-  },
   "dependencies": {
     "dedent-js": "^1.0.1"
+  },
+  "devDependencies": {
+    "prettier": "^1.12.1"
   }
 }
