@@ -20,6 +20,17 @@ module.exports = (cwd, command, flags) => {
 
     const config = getMetroConfig(symlinkedDependencies)
     fs.writeFileSync('metro.config.js', config)
+
+    if (!command) {
+        console.log(dedent`
+            wrote metro.config.js - https://github.com/MrLoh/metro-with-symlinks
+
+            Detected symlinked packages:
+            ${packagesString}
+        `)
+        process.exit()
+    }
+
     console.log(dedent`
         using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks
 
