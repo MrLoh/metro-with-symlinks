@@ -1,88 +1,106 @@
-/*
-   - check symlink in depencency and devDepency
-   - if found, generate rn-cli-config.js
-   - react-native start with rn-cli-config
+// Check for symlinks in node_modules
+// If found generate and use metro config.
+//
+// Sources:
+//     - https://github.com/facebook/metro/issues/1#issuecomment-346502388
+//     - https://github.com/facebook/metro/issues/1#issuecomment-334546083
 
-   Sources:
-   https://github.com/facebook/metro/issues/1#issuecomment-346502388
-   https://github.com/facebook/metro/issues/1#issuecomment-334546083
-*/
+const fs = require('fs')
+const exec = require('child_process').execSync
+const dedent = require('dedent-js')
 
-const fs = require('fs');
-const exec = require('child_process').execSync;
+const getDependencyPath = dependency =>
+    fs.realpathSync(`node_modules/${dependency}`)
 
-const getDependencyPath = (dependency) => fs.realpathSync(`node_modules/${dependency}`);
-
-const getSymlinkedDependencies = () => {
-  const packageJson = require(`${process.cwd()}/package.json`);
-  const dependencies = [
-    ...Object.keys(packageJson.dependencies),
-    ...Object.keys(packageJson.devDependencies),
-  ];
-  return dependencies.filter((dependency) =>
+const isSymlink = dependency =>
     fs.lstatSync(`node_modules/${dependency}`).isSymbolicLink()
-  );
-};
+const getSymlinkedDependencies = () =>
+    fs.readdirSync(`${process.cwd()}/node_modules`).filter(isSymlink)
 
-const generateMetroConfig = (symlinkedDependencies) => {
-  const symlinkedDependenciesPaths = symlinkedDependencies.map(getDependencyPath);
+const mapModule = name =>
+    `    '${name}': path.resolve(__dirname, 'node_modules/${name}')`
+const mapPath = path =>
+    `    /${path.replace(
+        /\//g,
+        '[/\\\\]',
+    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
 
-  const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
-    .map((path) => require(`${path}/package.json`).peerDependencies)
-    .map((peerDependencies) => (peerDependencies ? Object.keys(peerDependencies) : []))
-    // flatten the array of arrays
-    .reduce((flatDependencies, dependencies) => [...flatDependencies, ...dependencies], [])
-    // filter to make array elements unique
-    .filter((dependency, i, dependencies) => dependencies.indexOf(dependency) === i);
+const generateMetroConfig = symlinkedDependencies => {
+    const symlinkedDependenciesPaths = symlinkedDependencies.map(
+        getDependencyPath,
+    )
 
-  fs.writeFileSync(
-    'metro.config.js',
-    `/* eslint-disable */
-const path = require('path');
-const blacklist = require('metro/src/blacklist');
+    const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
+        .map(path => require(`${path}/package.json`).peerDependencies)
+        .map(
+            peerDependencies =>
+                peerDependencies ? Object.keys(peerDependencies) : [],
+        )
+        // flatten the array of arrays
+        .reduce(
+            (flatDependencies, dependencies) => [
+                ...flatDependencies,
+                ...dependencies,
+            ],
+            [],
+        )
+        // filter to make array elements unique
+        .filter(
+            (dependency, i, dependencies) =>
+                dependencies.indexOf(dependency) === i,
+        )
 
-module.exports = {
-  extraNodeModules: {
-    ${peerDependenciesOfSymlinkedDependencies
-      .map((name) => `'${name}': path.resolve(__dirname, 'node_modules/${name}')`)
-      .join(',\n    ')}
-  },
-  getBlacklistRE: () => blacklist([
-    ${symlinkedDependenciesPaths
-      .map(
-        (path) =>
-          `/${path.replace(/\//g, '[/\\\\]')}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
-      )
-      .join(',\n    ')}
-  ]),
-  getProjectRoots: () => [
-    // Include current package as project root
-    path.resolve(__dirname),
-    // Include symlinked packages as project roots
-    ${symlinkedDependenciesPaths.map((path) => `path.resolve('${path}')`).join(',\n    ')}
-  ],
-};`
-  );
-};
+    const extraNodeModules = peerDependenciesOfSymlinkedDependencies
+        .map(mapModule)
+        .join(',\n')
 
-/* global process */
+    const getBlacklistRE = symlinkedDependenciesPaths.map(mapPath).join(',\n')
 
-const symlinkedDependencies = getSymlinkedDependencies();
-// eslint-disable-next-line no-console
-console.log(`
-Detected symlinked packaged:
-${symlinkedDependencies
-  .map((dependency) => `   ${dependency} -> ${getDependencyPath(dependency)}`)
-  .join('\n')}
-`);
+    const getProjectRoots = symlinkedDependenciesPaths
+        .map(path => `    path.resolve('${path}')`)
+        .join(',\n')
 
-generateMetroConfig(symlinkedDependencies, 'metro.config.js');
-// eslint-disable-next-line no-console
-console.log('Generated custom metro.config.js to support symlinks\n');
+    return dedent`
+       const path = require('path');
+       const blacklist = require('metro/src/blacklist');
 
-const command = process.argv[2];
-const flags = process.argv.slice(3).join(' ');
+       module.exports = {
+           extraNodeModules: {
+           ${extraNodeModules}
+           },
+           getBlacklistRE: () => blacklist([
+           ${getBlacklistRE}
+           ]),
+           getProjectRoots: () => [
+               // Include current package as project root
+               path.resolve(__dirname),
+               // Include symlinked packages as project roots
+           ${getProjectRoots}
+           ],
+       };
+   `
+}
+
+const symlinkedDependencies = getSymlinkedDependencies()
+const packagesString = symlinkedDependencies
+    .map(
+        dependency => `    - ${dependency} -> ${getDependencyPath(dependency)}`,
+    )
+    .join('\n')
+
+const config = generateMetroConfig(symlinkedDependencies)
+fs.writeFileSync('metro.config.js', config)
+
+console.log(dedent`
+    using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks
+
+    Detected symlinked packages:
+    ${packagesString}
+`)
+
+const command = process.argv[2]
+const flags = process.argv.slice(3).join(' ')
 exec(
-  `node node_modules/react-native/local-cli/cli.js ${command} --config ../../../../metro.config.js ${flags}`,
-  { stdio: [0, 1, 2] }
-);
+    `node node_modules/react-native/local-cli/cli.js ${command} --config ../../../../metro.config.js ${flags}`,
+    { stdio: [0, 1, 2] },
+)

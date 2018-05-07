@@ -1,14 +1,19 @@
 {
   "name": "metro-with-symlinks",
   "version": "1.0.5",
-  "description": "Extension to metro packager enabling the use of symlinks",
-  "repository": "https://github.com/MrLoh/metro-with-symlinks",
-  "main": "index.js",
-  "author": "@MrLoh",
+  "description": "Extension to metro packager enabling the use of symlinks.",
   "license": "MIT",
-  "private": false,
-  "sripts": {
-    "publish": "npm version patch && npm publish"
+  "author": "@MrLoh",
+  "main": "index.js",
+  "repository": "https://github.com/MrLoh/metro-with-symlinks",
+  "scripts": {
+    "format": "prettier --write --list-different '*.js'",
+    "publish": "npm version patch && npm publish",
+    "test": "format"
+  },
+  "devDependencies": {
+    "dedent-js": "^1.0.1",
+    "prettier": "^1.12.1"
   },
   "peerDependencies": {
     "react-native": "^0.55.3"
