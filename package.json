@@ -15,7 +15,9 @@
     "test": "format"
   },
   "devDependencies": {
-    "dedent-js": "^1.0.1",
     "prettier": "^1.12.1"
+  },
+  "dependencies": {
+    "dedent-js": "^1.0.1"
   }
 }
