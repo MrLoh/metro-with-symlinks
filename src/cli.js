@@ -12,6 +12,8 @@ const getSymlinkedDependencies = require('./getSymlinkedDependencies')
 const getMetroConfig = require('./getMetroConfig')
 const getDependencyPath = require('./getDependencyPath')
 
+const CONFIG_FILENAME = 'rn-cli.config.js'
+
 const mapDep = dep => `    - ${dep} -> ${getDependencyPath(dep)}`
 
 module.exports = (cwd, command, flags) => {
@@ -19,27 +21,33 @@ module.exports = (cwd, command, flags) => {
     const packagesString = symlinkedDependencies.map(mapDep).join('\n')
 
     const config = getMetroConfig(symlinkedDependencies)
-    fs.writeFileSync('metro.config.js', config)
+    fs.writeFileSync(CONFIG_FILENAME, config)
 
-    if (!command) {
+    if (!symlinkedDependencies || symlinkedDependencies.length === 0) {
         console.log(dedent`
-            wrote metro.config.js - https://github.com/MrLoh/metro-with-symlinks
-
-            Detected symlinked packages:
-            ${packagesString}
-        `)
-        process.exit()
+          No symlinked packages detected
+      `)
     }
 
+    if (command) {
+        console.log(
+            'using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks',
+        )
+    } else {
+        console.log(
+            `wrote ${CONFIG_FILENAME} - https://github.com/MrLoh/metro-with-symlinks`,
+        )
+    }
     console.log(dedent`
-        using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks
-
+        
         Detected symlinked packages:
         ${packagesString}
-    `)
+  `)
+
+    if (!command) process.exit()
 
     exec(
-        `node node_modules/react-native/local-cli/cli.js ${command} --config ../../../../metro.config.js ${flags}`,
+        `node node_modules/react-native/local-cli/cli.js ${command} --config ../../../../${CONFIG_FILENAME} ${flags}`,
         { stdio: [0, 1, 2] },
     )
 }
