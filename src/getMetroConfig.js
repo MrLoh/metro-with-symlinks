@@ -14,7 +14,7 @@ const mapModule = name =>
     `    '${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
 const mapPath = path =>
-    `    /${path.replace(
+    `      /${path.replace(
         /\//g,
         '[/\\\\]',
     )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
@@ -55,22 +55,24 @@ module.exports = symlinkedDependencies => {
         .join(',\n')
 
     return dedent`
-       const path = require('path');
-       const blacklist = require('metro/src/blacklist');
+      const path = require('path');
+      const blacklist = require('metro/src/blacklist');
 
-       module.exports = {
-           extraNodeModules: {
-           ${extraNodeModules}
-           },
-           getBlacklistRE: () => blacklist([
-           ${getBlacklistRE}
-           ]),
-           getProjectRoots: () => [
-               // Include current package as project root
-               path.resolve(__dirname),
-               // Include symlinked packages as project roots
-           ${getProjectRoots}
-           ],
-       };
+      module.exports = {
+        extraNodeModules: {
+      ${extraNodeModules}
+        },
+        getBlacklistRE: () =>
+          blacklist([
+      ${getBlacklistRE}
+          ]),
+        getProjectRoots: () => [
+          // Include current package as project root
+          path.resolve(__dirname),
+          // Include symlinked packages as project roots
+      ${getProjectRoots}
+        ],
+      };
+      
    `
 }

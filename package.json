@@ -4,18 +4,13 @@
   "description": "Extension to metro packager enabling the use of symlinks.",
   "license": "MIT",
   "author": "@MrLoh",
-  "files": [
-    "src",
-    "bin"
-  ],
-  "main": "./src/index.js",
+  "files": ["src", "bin"],
   "bin": {
     "metro-with-symlinks": "./bin/index.js"
   },
   "repository": "https://github.com/MrLoh/metro-with-symlinks",
   "scripts": {
     "format": "prettier --write --list-different '**/*.js'",
-    "publish": "npm version patch && npm publish",
     "test": "format"
   },
   "dependencies": {
