@@ -27,22 +27,22 @@ module.exports = (cwd, command, flags) => {
         console.log(dedent`
           No symlinked packages detected
       `)
+    } else {
+        console.log(dedent`
+            Detected symlinked packages:
+            ${packagesString}
+        `)
     }
 
     if (command) {
-        console.log(
-            'using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks',
-        )
+        console.log(dedent`
+            using metro-with-symlinks - https://github.com/MrLoh/metro-with-symlinks
+        `)
     } else {
-        console.log(
-            `wrote ${CONFIG_FILENAME} - https://github.com/MrLoh/metro-with-symlinks`,
-        )
+        console.log(dedent`
+            wrote ${CONFIG_FILENAME} - https://github.com/MrLoh/metro-with-symlinks
+        `)
     }
-    console.log(dedent`
-        
-        Detected symlinked packages:
-        ${packagesString}
-  `)
 
     if (!command) process.exit()
 
