@@ -54,11 +54,14 @@ module.exports = symlinkedDependencies => {
         .map(path => `    path.resolve('${path}')`)
         .join(',\n')
 
+    const existingCliConfig = fs.existsSync('rn-cli.config.js') ? "require('./rn-cli.config.js')" : "{}";
+
     return dedent`
        const path = require('path');
        const blacklist = require('metro/src/blacklist');
+       const cliConfig = ${existingCliConfig};
 
-       module.exports = {
+       const config = {
            extraNodeModules: {
            ${extraNodeModules}
            },
@@ -72,5 +75,7 @@ module.exports = symlinkedDependencies => {
            ${getProjectRoots}
            ],
        };
+       
+       module.exports = Object.assign(config, cliConfig);
    `
 }
