@@ -4,7 +4,10 @@
     "description": "Extension to metro packager enabling the use of symlinks.",
     "license": "MIT",
     "author": "@MrLoh",
-    "files": ["src", "bin"],
+    "files": [
+        "src",
+        "bin"
+    ],
     "bin": {
         "metro-with-symlinks": "./bin/index.js"
     },
