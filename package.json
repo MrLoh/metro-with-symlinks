@@ -1,25 +1,25 @@
 {
-  "name": "metro-with-symlinks",
-  "version": "1.1.1",
-  "description": "Extension to metro packager enabling the use of symlinks.",
-  "license": "MIT",
-  "author": "@MrLoh",
-  "files": [
-    "src",
-    "bin"
-  ],
-  "bin": {
-    "metro-with-symlinks": "./bin/index.js"
-  },
-  "repository": "https://github.com/MrLoh/metro-with-symlinks",
-  "scripts": {
-    "format": "prettier --write --list-different '**/*.js'",
-    "test": "format"
-  },
-  "dependencies": {
-    "dedent-js": "^1.0.1"
-  },
-  "devDependencies": {
-    "prettier": "^1.12.1"
-  }
+    "name": "metro-with-symlinks",
+    "version": "1.1.1",
+    "description": "Extension to metro packager enabling the use of symlinks.",
+    "license": "MIT",
+    "author": "@MrLoh",
+    "files": [
+        "src",
+        "bin"
+    ],
+    "bin": {
+        "metro-with-symlinks": "./bin/index.js"
+    },
+    "repository": "https://github.com/MrLoh/metro-with-symlinks",
+    "scripts": {
+        "format": "prettier --write --list-different '**/*.js'",
+        "test": "format"
+    },
+    "dependencies": {
+        "dedent-js": "^1.0.1"
+    },
+    "devDependencies": {
+        "prettier": "^1.12.1"
+    }
 }
