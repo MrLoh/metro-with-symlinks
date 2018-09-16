@@ -53,7 +53,7 @@ module.exports = symlinkedDependencies => {
         .join(',\n  ')
 
     const getProjectRoots = symlinkedDependenciesPaths
-        .map(path => `path.resolve('${path}')`)
+        .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
         .join(',\n  ')
 
     return dedent`
