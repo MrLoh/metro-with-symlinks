@@ -15,6 +15,20 @@ npm install -D metro-with-symlinks
 
 In the most recent version of the metro bundler, you just need to have a `rn-cli.config` file in your root folder and it will automatically be read by the bundler. You can generate that file by running `metro-with-symlinks` without any argument in the terminal, which will generate the `rn-cli.config` file. You will have to regenerate this file, whenever you symlink another package or add a peerDependency to your link
 
+### Side Effects
+
+Since this fix consists of adding linked packages as react-native project roots, this causes react native to try and transpile the code of the package. This can be an issue if your package has its own transpilation process, leading to multiple transpilation attempts on the same code. To prevent this from happening, you'll have to ignore the linked package from inside the react native projects `.babelrc`. For example: 
+
+```json
+{
+  ... 
+  "ignore": [
+    "some-linked-package"
+  ]
+}
+```
+
+
 ## Usage (Older Versions)
 
 In older versions, you have to tell the packager where to find the config file. To do so you can simply replace the standard `react-native` commands with this custom command. For example: replace the start script in your `package.json` with this:
