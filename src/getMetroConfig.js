@@ -8,49 +8,49 @@
 const fs = require('fs')
 const exec = require('child_process').execSync
 const dedent = require('dedent-js')
-const getDependencyPath = require('./getDependencyPath')
 
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
-const mapPath = path =>
-    `/${path.replace(
-        /\//g,
-        '[/\\\\]',
-    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
+const mapPath = path => `/${path.replace(/\//g, '[/\\\\]')}[/\\\\].*/`
 
-module.exports = symlinkedDependencies => {
-    const symlinkedDependenciesPaths = symlinkedDependencies.map(
-        getDependencyPath,
+const flatten = arr =>
+    arr.reduce(
+        (flatDependencies, dependencies) => [
+            ...flatDependencies,
+            ...dependencies,
+        ],
+        [],
     )
 
-    const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
+const unique = arr => Array.from(new Set(arr))
+
+module.exports = symlinkedDependenciesPaths => {
+    const rawPeerDeps = symlinkedDependenciesPaths
         .map(path => require(`${path}/package.json`).peerDependencies)
         .map(
             peerDependencies =>
                 peerDependencies ? Object.keys(peerDependencies) : [],
         )
-        // flatten the array of arrays
-        .reduce(
-            (flatDependencies, dependencies) => [
-                ...flatDependencies,
-                ...dependencies,
-            ],
-            [],
-        )
-        // filter to make array elements unique
-        .filter(
-            (dependency, i, dependencies) =>
-                dependencies.indexOf(dependency) === i,
-        )
 
-    const extraNodeModules = peerDependenciesOfSymlinkedDependencies
+    const peerDepsOfSymlinkedDeps = unique(flatten(rawPeerDeps))
+
+    const peerDepsOfSymlinkedDepsWithPaths = unique(
+        flatten(
+            rawPeerDeps.map((depsList, i) =>
+                depsList.map(
+                    dep =>
+                        `${symlinkedDependenciesPaths[i]}/node_modules/${dep}`,
+                ),
+            ),
+        ),
+    )
+
+    const extraNodeModules = peerDepsOfSymlinkedDeps
         .map(mapModule)
         .join(',\n  ')
 
-    const getBlacklistRE = symlinkedDependenciesPaths
-        .map(mapPath)
-        .join(',\n  ')
+    const getBlacklistPeerRE = peerDepsOfSymlinkedDepsWithPaths.map(mapPath)
 
     const getProjectRoots = symlinkedDependenciesPaths
         .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
@@ -63,7 +63,7 @@ module.exports = symlinkedDependencies => {
         ${extraNodeModules}
       };
       const blacklistRegexes = [
-        ${getBlacklistRE}
+        ${getBlacklistPeerRE}
       ];
       const watchFolders = [
         ${getProjectRoots}
