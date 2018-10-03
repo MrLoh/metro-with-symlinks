@@ -10,14 +10,14 @@ const exec = require('child_process').execSync
 const dedent = require('dedent-js')
 const getSymlinkedDependencies = require('./getSymlinkedDependencies')
 const getMetroConfig = require('./getMetroConfig')
-const getDependencyPath = require('./getDependencyPath')
 
 const CONFIG_FILENAME = 'rn-cli.config.js'
 
-const mapDep = dep => `    - ${dep} -> ${getDependencyPath(dep)}`
+const mapDep = dep => `    - ${dep}`
 
 module.exports = (cwd, command, flags) => {
     const symlinkedDependencies = getSymlinkedDependencies(cwd)
+
     const packagesString = symlinkedDependencies.map(mapDep).join('\n')
 
     const config = getMetroConfig(symlinkedDependencies)
