@@ -58,7 +58,7 @@ module.exports = symlinkedDependencies => {
 
     return dedent`
        const path = require('path');
-       const blacklist = require('metro/src/blacklist');
+       const blacklist = require('metro-config/src/defaults/blacklist');
        const cliConfig = ${existingCliConfig};
 
        const config = {
