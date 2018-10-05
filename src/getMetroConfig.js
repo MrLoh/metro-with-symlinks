@@ -11,10 +11,10 @@ const dedent = require('dedent-js')
 const getDependencyPath = require('./getDependencyPath')
 
 const mapModule = name =>
-    `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
+    `    '${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
 const mapPath = path =>
-    `/${path.replace(
+    `    /${path.replace(
         /\//g,
         '[/\\\\]',
     )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
@@ -46,48 +46,36 @@ module.exports = symlinkedDependencies => {
 
     const extraNodeModules = peerDependenciesOfSymlinkedDependencies
         .map(mapModule)
-        .join(',\n  ')
+        .join(',\n')
 
-    const getBlacklistRE = symlinkedDependenciesPaths
-        .map(mapPath)
-        .join(',\n  ')
+    const getBlacklistRE = symlinkedDependenciesPaths.map(mapPath).join(',\n')
 
     const getProjectRoots = symlinkedDependenciesPaths
-        .map(path => `path.resolve('${path.replace(/\\/g, '\\\\')}')`)
-        .join(',\n  ')
+        .map(path => `    path.resolve('${path}')`)
+        .join(',\n')
+
+    const existingCliConfig = fs.existsSync('rn-cli.config.js') ? "require('./rn-cli.config.js')" : "{}";
 
     return dedent`
-      const path = require('path');
+       const path = require('path');
+       const blacklist = require('metro-config/src/defaults/blacklist');
+       const cliConfig = ${existingCliConfig};
 
-      const extraNodeModules = {
-        ${extraNodeModules}
-      };
-      const blacklistRegexes = [
-        ${getBlacklistRE}
-      ];
-      const watchFolders = [
-        ${getProjectRoots}
-      ];
-
-      const metroVersion = require('metro/package.json').version;
-      const metroVersionComponents = metroVersion.match(/^(\\d+)\\.(\\d+)\\.(\\d+)/);
-      if (metroVersionComponents[1] === '0' && parseInt(metroVersionComponents[2], 10) >= 43) {
-          module.exports = {
-            resolver: {
-              extraNodeModules,
-              blacklistRE: require('metro-config/src/defaults/blacklist')(blacklistRegexes)
-            },
-            watchFolders
-          };
-      } else {
-          module.exports = {
-            extraNodeModules,
-            getBlacklistRE: () => require('metro/src/blacklist')(blacklistRegexes),
-            getProjectRoots: () => [path.resolve(__dirname)].concat(watchFolders)
-          };
-      }
-
-
-
+       const config = {
+           extraNodeModules: {
+           ${extraNodeModules}
+           },
+           getBlacklistRE: () => blacklist([
+           ${getBlacklistRE}
+           ]),
+           getProjectRoots: () => [
+               // Include current package as project root
+               path.resolve(__dirname),
+               // Include symlinked packages as project roots
+           ${getProjectRoots}
+           ],
+       };
+       
+       module.exports = Object.assign(config, cliConfig);
    `
 }
