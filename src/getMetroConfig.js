@@ -13,11 +13,8 @@ const getDependencyPath = require('./getDependencyPath')
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
-const mapPath = path =>
-    `/${path.replace(
-        /\//g,
-        '[/\\\\]',
-    )}[/\\\\]node_modules[/\\\\]react-native[/\\\\].*/`
+const mapPath = path => 
+    '/' + `${path}/node_modules/react-native/`.replace(/[\\\/]/g, '[\\/\\\\]') + '.*/'
 
 module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
