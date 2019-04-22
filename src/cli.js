@@ -46,8 +46,13 @@ module.exports = (cwd, command, flags) => {
 
     if (!command) process.exit()
 
+    const reactNativeVersion = require('react-native/package.json').version;
+    const reactNativeVersionComponents = reactNativeVersion.match(/^(\d+)\.(\d+)\.(\d+)/);
+    const configNeedsRelativePath = (reactNativeVersionComponents[1] === '0' && parseInt(reactNativeVersionComponents[2], 10) < 59);
+    const configBasePath = configNeedsRelativePath ? '../../../../' : '';
+
     exec(
-        `node node_modules/react-native/local-cli/cli.js ${command} --config ../../../../${CONFIG_FILENAME} ${flags}`,
+        `node node_modules/react-native/local-cli/cli.js ${command} --config ${configBasePath}${CONFIG_FILENAME} ${flags}`,
         { stdio: [0, 1, 2] },
     )
 }
