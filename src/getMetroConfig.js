@@ -13,40 +13,32 @@ const getDependencyPath = require('./getDependencyPath')
 const mapModule = name =>
     `'${name}': path.resolve(__dirname, 'node_modules/${name}')`
 
-const mapPath = path => 
-    '/' + `${path}/node_modules/react-native/`.replace(/[\\\/]/g, '[\\/\\\\]') + '.*/'
+const mapPath = (path, dependency) =>
+    '/' + `${path}/node_modules/${dependency}/`.replace(/[\\\/]/g, '[\\/\\\\]') + '.*/'
 
 module.exports = symlinkedDependencies => {
     const symlinkedDependenciesPaths = symlinkedDependencies.map(
         getDependencyPath,
     )
 
-    const peerDependenciesOfSymlinkedDependencies = symlinkedDependenciesPaths
-        .map(path => require(`${path}/package.json`).peerDependencies)
-        .map(
-            peerDependencies =>
-                peerDependencies ? Object.keys(peerDependencies) : [],
-        )
-        // flatten the array of arrays
-        .reduce(
-            (flatDependencies, dependencies) => [
-                ...flatDependencies,
-                ...dependencies,
-            ],
-            [],
-        )
-        // filter to make array elements unique
-        .filter(
-            (dependency, i, dependencies) =>
-                dependencies.indexOf(dependency) === i,
-        )
+    let blacklist = [];
+    let allPeerDependencies = new Set();
+    symlinkedDependenciesPaths.forEach((symlinkedDependencyPath) => {
+        let peerDependenciesOfSymlinkedDependency = Object.keys(
+            require(`${symlinkedDependencyPath}/package.json`).peerDependencies || []
+        );
 
-    const extraNodeModules = peerDependenciesOfSymlinkedDependencies
+        peerDependenciesOfSymlinkedDependency.forEach((dependency) => {
+            allPeerDependencies.add(dependency);
+            blacklist.push(mapPath(symlinkedDependencyPath, dependency))
+        });
+    });
+
+    const extraNodeModules = Array.from(allPeerDependencies)
         .map(mapModule)
         .join(',\n  ')
 
-    const getBlacklistRE = symlinkedDependenciesPaths
-        .map(mapPath)
+    const getBlacklistRE = blacklist
         .join(',\n  ')
 
     const getProjectRoots = symlinkedDependenciesPaths
