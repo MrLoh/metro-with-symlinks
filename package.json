@@ -1,6 +1,6 @@
 {
     "name": "metro-with-symlinks",
-    "version": "1.3.2",
+    "version": "1.4.0",
     "description": "Extension to metro packager enabling the use of symlinks.",
     "license": "MIT",
     "author": "@MrLoh",
